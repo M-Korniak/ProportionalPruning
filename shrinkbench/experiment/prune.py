@@ -19,11 +19,10 @@ class PruningExperiment(TrainingExperiment):
                  dl_kwargs=dict(),
                  train_kwargs=dict(),
                  debug=False,
-                 pretrained=True,
+                 pretrained=False,
                  resume=None,
                  resume_optim=False,
                  save_freq=10):
-
         super(PruningExperiment, self).__init__(dataset, model, seed, path, dl_kwargs, train_kwargs, debug, pretrained, resume, resume_optim, save_freq)
         self.add_params(strategy=strategy, compression=compression)
 
