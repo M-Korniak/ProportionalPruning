@@ -34,10 +34,56 @@ class GlobalMagWeight(VisionPruning):
 class LayerMagWeight(LayerPruning, VisionPruning):
 
     def layer_masks(self, module):
+        print(module)
         params = self.module_params(module)
         importances = {param: np.abs(value) for param, value in params.items()}
         masks = {param: fraction_mask(importances[param], self.fraction)
                  for param, value in params.items() if value is not None}
+        return masks
+
+class LayerL1Stuctured(LayerPruning, VisionPruning):
+
+    def layer_masks(self, module):
+        params = self.module_params(module)
+        masks = {}
+        if params['weight'].ndim == 2:
+            # this is linear
+            # Calculate first norm per row
+            norms = np.linalg.norm(params['weight'], ord=1, axis=1)
+            # Sort by norm descending
+            sorted_indices = np.argsort(-norms)
+            # select self.fraction * len(norms) indices
+            num_to_select = int(self.fraction * len(norms))
+            selected_indices = sorted_indices[:num_to_select]
+            # Create mask
+            mask = np.zeros_like(params['weight'], dtype=bool)
+            mask[selected_indices] = True
+            masks = {'weight': mask}
+            # the same indices for biases
+            if params['bias'] is not None:
+                masks['bias'] = np.zeros_like(params['bias'], dtype=bool)
+                masks['bias'][selected_indices] = True
+
+        elif params['weight'].ndim == 4:
+            # This is a Conv2d layer
+            # Calculate L1 norm per channel (axis 1 in weight is channel dimension)
+            norms = np.sum(np.abs(params['weight']), axis=(1, 2, 3)) # L1 norm across height, width, and channels
+            sorted_indices = np.argsort(-norms)
+            num_to_select = int(self.fraction * len(norms))  # Fraction of channels to keep
+            selected_indices = sorted_indices[:num_to_select]
+            
+            # Create mask to prune out channels
+            mask = np.zeros_like(params['weight'], dtype=bool)
+            mask[selected_indices] = True
+            masks['weight'] = mask
+            
+            # The same indices for biases (if applicable)
+            if params['bias'] is not None:
+                masks['bias'] = np.zeros_like(params['bias'], dtype=bool)
+                masks['bias'][selected_indices] = True
+        else:
+            raise ValueError(f"Module {module} has weight of shape {params['weight'].shape}")
+        
         return masks
 
 
