@@ -1,5 +1,5 @@
 import os
-from shrinkbench.experiment import PruningExperiment
+from shrinkbench.experiment import TrainingExperiment
 
 os.environ['DATAPATH'] = 'data/CIFAR10'
 
