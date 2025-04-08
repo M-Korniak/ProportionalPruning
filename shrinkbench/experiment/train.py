@@ -13,7 +13,7 @@ from .base import Experiment
 from .. import datasets
 from .. import models
 from ..metrics import correct
-from ..models.head import mark_classifier
+from ..models.head import mark_classifier, replace_head
 from ..util import printc, OnlineStats
 
 
@@ -40,7 +40,9 @@ class TrainingExperiment(Experiment):
                  pretrained=False,
                  resume=None,
                  resume_optim=False,
-                 save_freq=10):
+                 save_freq=10,
+                 n_classes=None,
+                 change_head=False):
 
         # Default children kwargs
         super(TrainingExperiment, self).__init__(seed)
@@ -55,7 +57,7 @@ class TrainingExperiment(Experiment):
 
         self.build_dataloader(dataset, **dl_kwargs)
 
-        self.build_model(model, pretrained, resume)
+        self.build_model(model, pretrained, resume, change_head, n_classes)
 
         self.build_train(resume_optim=resume_optim, **train_kwargs)
 
@@ -76,14 +78,21 @@ class TrainingExperiment(Experiment):
         self.train_dl = DataLoader(self.train_dataset, shuffle=True, **dl_kwargs)
         self.val_dl = DataLoader(self.val_dataset, shuffle=False, **dl_kwargs)
 
-    def build_model(self, model, pretrained=True, resume=None):
+    def build_model(self, model, pretrained=False, resume=None, change_head=False, n_classes=None):
         if isinstance(model, str):
+ 
             if hasattr(models, model):
                 model = getattr(models, model)(pretrained=pretrained)
 
             elif hasattr(torchvision.models, model):
+                if not pretrained:
+                    pretrained = None
                 # https://pytorch.org/docs/stable/torchvision/models.html
-                model = getattr(torchvision.models, model)(pretrained=pretrained)
+                model = getattr(torchvision.models, model)(weights=pretrained)
+
+                if n_classes is not None:
+                    replace_head(model, n_classes, keep_weights=False)
+
                 mark_classifier(model)  # add is_classifier attribute
             else:
                 raise ValueError(f"Model {model} not available in custom models or torchvision models")

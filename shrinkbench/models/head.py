@@ -107,7 +107,7 @@ def get_classifier_module(model):
     Raises:
         NotImplementedError -- Raised when the architecture class is not supported
     """
-
+    i = None
     if isinstance(model, MODELS_WITH_FC):
         clf = 'fc'
 
@@ -116,7 +116,8 @@ def get_classifier_module(model):
 
     elif isinstance(model, MODELS_WITH_CLASSIFIER_LIST):
         i = len(model.classifier) - 1
-        clf = f"classifier.{i}"
+        clf = "classifier"
+        print(model.classifier)
 
     elif isinstance(model, torchvision.models.SqueezeNet):
         # TODO: Non standard, uses convs
@@ -130,7 +131,12 @@ def get_classifier_module(model):
 
     else:
         raise NotImplementedError(f"Model {model} not recognized")
-    clf = getattr(model, clf)
+
+    clf = getattr(model, 'classifier')
+
+    if i is not None:
+        clf = clf[i]
+        
     return clf
 
 
