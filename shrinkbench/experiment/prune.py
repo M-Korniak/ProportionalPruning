@@ -22,8 +22,10 @@ class PruningExperiment(TrainingExperiment):
                  pretrained=False,
                  resume=None,
                  resume_optim=False,
-                 save_freq=10):
-        super(PruningExperiment, self).__init__(dataset, model, seed, path, dl_kwargs, train_kwargs, debug, pretrained, resume, resume_optim, save_freq)
+                 save_freq=10,
+                 n_classes=None,
+                 change_head=False):
+        super(PruningExperiment, self).__init__(dataset, model, seed, path, dl_kwargs, train_kwargs, debug, pretrained, resume, resume_optim, save_freq, n_classes, change_head)
         self.add_params(strategy=strategy, compression=compression)
 
         self.apply_pruning(strategy, compression)
