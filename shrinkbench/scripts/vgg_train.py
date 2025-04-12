@@ -1,7 +1,7 @@
 import os
 from shrinkbench.experiment import TrainingExperiment
 
-os.environ['DATAPATH'] = 'data/CIFAR10'
+os.environ['DATAPATH'] = '$HOME/ProportionalPruning/data/CIFAR10'
 
 exp = TrainingExperiment(dataset='CIFAR10', 
                                 model='vgg11',
