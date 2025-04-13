@@ -43,6 +43,7 @@ def dataset_path(dataset, path=None):
 
     for p in paths:
         p = (p / dataset).resolve()
+        print("PATH - ", p)
         if p.exists():
             print(f"Found {dataset} under {p}")
             return p
