@@ -1,9 +1,10 @@
 import os
 from shrinkbench.experiment import TrainingExperiment
 
-print("Hello from vgg_train")
 os.environ['DATAPATH'] = '$HOME/ProportionalPruning/data/CIFAR10'
-print("Datapath env set")
+
+print(os.getcwd())
+
 exp = TrainingExperiment(dataset='CIFAR10', 
                                 model='vgg11',
                                 pretrained=False,
