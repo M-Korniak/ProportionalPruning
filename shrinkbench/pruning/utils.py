@@ -88,6 +88,36 @@ def get_activations(model, input):
 
     return activations
 
+def get_activations_outputs(model, input):
+    """ Applies hook to all activation modules that collects outputs from activations.
+
+    Arguments:
+        model {torch.nn.Module} -- Network to extract the parameters from
+
+        input -- batch of inputs from which we collect activations
+
+    Returns:
+        Dict(str:numpy.ndarray) -- Dictionary of named parameters their
+                                   associated parameter arrays
+    """
+    activations = OrderedDict()
+
+    def store_activations(module, input, output):
+        if module.is_activation:
+            assert module not in activations, \
+                f"{module} already in activations"
+            # TODO [0] means first input, not all models have a single input
+            activations[module] = output.detach().cpu().numpy().copy()
+
+    fn, hooks = hook_applyfn(store_activations, model, forward=True)
+    model.apply(fn)
+    with torch.no_grad():
+        model(input)
+
+    for h in hooks:
+        h.remove()
+
+    return activations
 
 def get_gradients(model, inputs, outputs):
     # TODO implement using model.register_backward_hook()
