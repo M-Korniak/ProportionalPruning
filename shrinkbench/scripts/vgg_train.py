@@ -1,10 +1,11 @@
 import os
-from shrinkbench.experiment import PruningExperiment
+from shrinkbench.experiment import TrainingExperiment
 
-os.environ['DATAPATH'] = 'data/CIFAR10'
+os.environ['DATAPATH'] = 'ProportionalPruning/data/CIFAR10'
+
 
 exp = TrainingExperiment(dataset='CIFAR10', 
-                                model='VGG11',
+                                model='vgg11',
                                 pretrained=False,
                                 train_kwargs={'epochs':2})
 exp.run()
